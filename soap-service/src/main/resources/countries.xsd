@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    countries.xsd  –  XML Schema Definition
+    ════════════════════════════════════════
+    This file is the single source of truth for the SOAP service contract.
+
+    Purpose
+    ───────
+    • Defines the XML structure of every request and response the service accepts.
+    • Spring-WS reads this file at startup to:
+        1. Validate incoming SOAP messages against the schema.
+        2. Generate the WSDL document automatically via DefaultWsdl11Definition.
+
+    Namespace
+    ─────────
+    targetNamespace="http://example.com/soap/countries"
+    Every generated element/type belongs to this namespace.
+    The same namespace string is used in:
+        • @PayloadRoot(namespace = "…") on the endpoint method
+        • @XmlType(namespace = "…") on the model classes
+
+    elementFormDefault="qualified"
+    ──────────────────────────────
+    All elements declared in this schema must be namespace-qualified
+    in instance documents (i.e. carry the namespace prefix or default namespace).
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://example.com/soap/countries"
+           targetNamespace="http://example.com/soap/countries"
+           elementFormDefault="qualified">
+
+    <!--
+        getCountryRequest
+        ─────────────────
+        The payload the SOAP client sends to look up a country.
+        Contains a single <name> string element.
+        Spring-WS routes incoming messages to CountryEndpoint#getCountry()
+        when the root element of the SOAP body matches this element name
+        and the namespace above.
+    -->
+    <xs:element name="getCountryRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!--
+        getCountryResponse
+        ──────────────────
+        The payload the SOAP service returns.
+        Contains a single <country> complex element (see below).
+    -->
+    <xs:element name="getCountryResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="country" type="tns:country"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!--
+        country (complex type)
+        ──────────────────────
+        Represents a country with basic attributes.
+        Referenced by getCountryResponse above.
+    -->
+    <xs:complexType name="country">
+        <xs:sequence>
+            <xs:element name="name"       type="xs:string"/>
+            <xs:element name="population" type="xs:int"/>
+            <xs:element name="capital"    type="xs:string"/>
+            <xs:element name="currency"   type="tns:currency"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!--
+        currency (simple type / enum)
+        ─────────────────────────────
+        Restricts the currency field to one of three allowed values.
+        Mapped to a Java enum Currency in the model layer.
+    -->
+    <xs:simpleType name="currency">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="GBP"/>
+            <xs:enumeration value="EUR"/>
+            <xs:enumeration value="USD"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
