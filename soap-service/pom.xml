@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Spring Boot Parent POM
+        ─────────────────────
+        Inheriting from spring-boot-starter-parent gives us:
+          • Managed dependency versions (no need to specify versions for most Spring deps)
+          • Sensible Maven plugin defaults (compiler plugin set to Java 17, etc.)
+          • Default resource filtering for application.properties / application.yml
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.3</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>soap-service</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>soap-service</name>
+    <description>Simple Spring Boot SOAP Web Service using Spring-WS</description>
+
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+
+    <dependencies>
+
+        <!--
+            spring-boot-starter-web-services
+            ────────────────────────────────
+            Pulls in:
+              • spring-ws-core  – Spring-WS framework (MessageDispatcherServlet, @Endpoint, etc.)
+              • spring-xml      – XML processing utilities used internally by Spring-WS
+              • spring-web      – Servlet integration (runs on embedded Tomcat)
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web-services</artifactId>
+        </dependency>
+
+        <!--
+            wsdl4j
+            ──────
+            Used by Spring-WS's DefaultWsdl11Definition bean to
+            programmatically generate a WSDL document from our XSD schema
+            at runtime (exposed at /ws/countries.wsdl).
+        -->
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>
+
+        <!--
+            jakarta.xml.bind-api
+            ────────────────────
+            Jakarta XML Binding (JAXB) API – defines the annotations
+            (@XmlRootElement, @XmlType, @XmlElement, etc.) and the
+            JAXBContext / Marshaller interfaces used to convert between
+            Java objects and XML.
+
+            Spring Boot 3.x uses the Jakarta namespace (jakarta.xml.bind)
+            instead of the old javax.xml.bind namespace.
+        -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+
+        <!--
+            jaxb-impl (runtime)
+            ───────────────────
+            The actual JAXB implementation (Eclipse Metro / RI).
+            Scope "runtime" means it is only needed at run time, not
+            during compilation; the API above is sufficient to compile.
+        -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ── Testing ─────────────────────────────────────────────── -->
+
+        <!--
+            spring-boot-starter-test
+            ────────────────────────
+            Includes JUnit 5, Mockito, AssertJ, Spring Test
+            (MockMvc, @SpringBootTest, etc.) and more.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+            spring-ws-test
+            ──────────────
+            Provides MockWebServiceClient – lets us send a SOAP request
+            to the endpoint in a unit/integration test without starting
+            an actual HTTP server.
+        -->
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                spring-boot-maven-plugin
+                ────────────────────────
+                Repackages the JAR into a "fat JAR" (also called an
+                über-JAR or executable JAR) that contains all dependencies
+                and an embedded Tomcat server so the app can be run with:
+                    java -jar soap-service-1.0.0.jar
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
